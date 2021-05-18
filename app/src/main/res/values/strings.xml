@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">TiempoKotlin</string>
+    <string name="txt_edit_cidudad">Ciudad</string>
+    <string name="txt_madrid">Madrid</string>
+    <string name="btn_enviar">ENVIAR</string>
+    <string name="content_desc_icono_tiempo">icono del tiempo actual</string>
+    <string name="aleatorio">Aleatorio</string>
+</resources>
