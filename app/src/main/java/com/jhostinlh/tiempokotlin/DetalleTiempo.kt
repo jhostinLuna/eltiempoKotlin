@@ -1,10 +1,16 @@
 package com.jhostinlh.tiempokotlin
 
+import Dia
+import android.location.Address
+import android.location.Geocoder
 import android.os.Bundle
 import android.util.Log
+import android.view.MotionEvent
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.jakewharton.threetenabp.AndroidThreeTen
 import com.jhostinlh.tiempokotlin.Modelo.PrediccionTiempo
 import com.jhostinlh.tiempokotlin.Recycler.RecyclerPrediccionTiempo
 import com.jhostinlh.tiempokotlin.Retrofit.MyApiAdapter
@@ -23,26 +29,57 @@ class DetalleTiempo : AppCompatActivity() {
 
     lateinit var binding: ActivityDetalleTiempoBinding
     lateinit var recycler: RecyclerView
+    lateinit var geo: Geocoder
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityDetalleTiempoBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
+        AndroidThreeTen.init(this)
         recycler = findViewById(R.id.recycler_tiempo)
         recycler.layoutManager = LinearLayoutManager(this,LinearLayoutManager.VERTICAL,false)
+        geo = Geocoder(this)
 
-        getiempo()
+
+        getDias()
 
     }
 
-    fun getiempo() {
-        val myApiService: MyApiService? = MyApiAdapter.getApiService()
-        val ciudad = intent.getSerializableExtra(CIUDAD).toString()
-        val call = myApiService?.getPrediccion7x3(ciudad,"es","metric", API_KEY)
+    fun getDias(){
+        val geocoder = intent.getParcelableArrayListExtra<Address>(CIUDAD)
+        val apiAdapter = MyApiAdapter.getApiService()
+        val call = apiAdapter?.getPrediccionDias(
+                geocoder?.get(0)?.latitude.toString(), geocoder?.get(0)?.longitude.toString(),
+                "current,minutely,alerts","metric","es", API_KEY)
 
         if (call != null) {
-            call.enqueue(object: Callback<PrediccionTiempo> {
-                override fun onFailure(call: Call<PrediccionTiempo>?, t: Throwable?) {
+            call.enqueue(object :Callback<Dia> {
+                override fun onResponse(call: Call<Dia>, response: Response<Dia>) {
+                    if (!response.isSuccessful){
+                        Log.i("response", "Response sin exito!!")
+                        return
+                    }
+                    val respuesta = response.body()
+                    if (respuesta != null) {
+                        Log.i("responseDia",respuesta.toString())
+                        if (geocoder != null) {
+                            binding.txtCiudadLdt.text = geocoder.get(0).locality
+                            binding.txtTemperaturaLdt.text = Math.round(respuesta.daily.get(0).temp!!.day).toString()
+                            binding.description.text = respuesta.daily.get(0).weather!!.get(0).description
+                            val recyclerTiempo = RecyclerPrediccionTiempo(respuesta)
+
+                            if (respuesta != null) {
+                                Log.i("dia", respuesta.getListHours(respuesta.daily.get(0).dt!!.toInt()).toString())
+                            }else{
+                                Log.i("dia","Dia es null")
+                            }
+
+                            recycler.adapter = recyclerTiempo
+
+                        }
+                    }
+                }
+
+                override fun onFailure(call: Call<Dia>, t: Throwable) {
                     if (t is IOException) {
                         Log.i("problema","Problemasde conexion!!")
                         // logging probably not necessary
@@ -51,36 +88,8 @@ class DetalleTiempo : AppCompatActivity() {
 
                     }
                 }
-
-                override fun onResponse(call: Call<PrediccionTiempo>?, response: Response<PrediccionTiempo>?) {
-                    if (response != null) {
-                        if (!response.isSuccessful){
-                            Log.i("response","Sin exito")
-                            return
-                        }
-                        val predTiempo:PrediccionTiempo?= response.body()
-
-                        binding.txtCiudadLdt.text = predTiempo?.city?.name
-                        var aux: Double? = predTiempo?.lista?.get(0)?.cmain?.temp
-                        var vaux = aux?.let { Math.round(it) }
-                        binding.txtTemperaturaLdt.text = vaux.toString()
-                        binding.description.text = predTiempo?.lista?.get(0)?.weather?.get(0)?.description
-                        val recyclerTiempo = RecyclerPrediccionTiempo(predTiempo?.lista)
-                        if (predTiempo != null) {
-                            Log.i("lista",predTiempo.lista.toString())
-                        }
-                        recycler.adapter = recyclerTiempo
-
-                    }else {
-                        Log.i("response","Es null")
-                    }
-
-
-                }
-            })
+            } )
         }
-
-
 
     }
 

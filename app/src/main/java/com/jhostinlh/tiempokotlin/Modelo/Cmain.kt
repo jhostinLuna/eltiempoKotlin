@@ -9,9 +9,9 @@ data class Cmain(
     @SerializedName("grnd_level")
     val grndLevel: Int?,
     @SerializedName("humidity")
-    val humidity: Int?,
+    val humidity: String?,
     @SerializedName("pressure")
-    val pressure: Int?,
+    val pressure: String?,
     @SerializedName("sea_level")
     val seaLevel: Int?,
     @SerializedName("temp")

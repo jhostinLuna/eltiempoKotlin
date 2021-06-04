@@ -63,4 +63,7 @@ dependencies {
     implementation 'com.squareup.picasso:picasso:2.8'
     //RecyclerView
     implementation "androidx.recyclerview:recyclerview:1.2.0"
+    // font awesome library
+
+    implementation 'info.androidhive:fontawesome:0.0.5'
 }

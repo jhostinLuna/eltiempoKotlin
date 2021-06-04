@@ -1,21 +1,19 @@
 package com.jhostinlh.tiempokotlin
 
+import Dia
 import android.content.Intent
+import android.location.Address
+import android.location.Geocoder
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.Toast
-import androidx.activity.viewModels
-import com.jhostinlh.tiempokotlin.Modelo.PrediccionTiempo
 import com.jhostinlh.tiempokotlin.Retrofit.MyApiAdapter
-import com.jhostinlh.tiempokotlin.Retrofit.MyApiService
 import com.jhostinlh.tiempokotlin.databinding.ActivityMainBinding
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
 import java.io.IOException
 
 const val CIUDAD = "com.jhostinlh.tiempokotlin.CIUDAD"
@@ -31,26 +29,40 @@ class MainActivity : AppCompatActivity() {
         })
 
          */
+        val apiAdapter = MyApiAdapter.getApiService()
+        val geo = Geocoder(this)
+
+        val mutableList = geo.getFromLocationName("madrid",1)
+
+        Log.i("geo",mutableList.toString())
+
+
+
+
     }
 
 
-    override fun onStart() {
-        super.onStart()
-    }
+
 
 
 
     fun intentToDetalle(view: View){
-
         var txtciudad: String = binding.edittxtCiudad.text.toString()
-        if (!txtciudad.isEmpty()){
-            var miIntent: Intent = Intent(getApplicationContext(),DetalleTiempo::class.java)
-                    .apply { putExtra(CIUDAD,txtciudad) }
+        val city = getGeocoder(txtciudad)
+
+        if (txtciudad.isNotEmpty() && city.isNotEmpty()){
+            var miIntent: Intent = Intent(this,DetalleTiempo::class.java)
+                    .apply { putParcelableArrayListExtra(CIUDAD,ArrayList(city)) }
             startActivity(miIntent);
         }else{
 
             Toast.makeText(this, "¡Introduce una ciudad válida!", Toast.LENGTH_SHORT).show()
         }
 
+    }
+    fun getGeocoder(ciudad: String): MutableList<Address>{
+        val geocoder = Geocoder(this)
+        val city = geocoder.getFromLocationName(ciudad, 1)
+        return city
     }
 }
