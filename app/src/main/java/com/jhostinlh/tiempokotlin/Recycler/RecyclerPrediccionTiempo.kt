@@ -16,12 +16,16 @@ import androidx.recyclerview.widget.RecyclerView
 import com.jhostinlh.tiempokotlin.Detalle
 import com.jhostinlh.tiempokotlin.R
 import com.jhostinlh.tiempokotlin.URL_ICON
+import com.jhostinlh.tiempokotlin.databinding.ItemDiaBinding
 import com.squareup.picasso.Picasso
 import com.squareup.picasso.Target
 import org.threeten.bp.Instant
 import org.threeten.bp.LocalDateTime
 import org.threeten.bp.ZoneId
 import org.threeten.bp.format.DateTimeFormatter
+import org.threeten.bp.format.TextStyle
+import java.util.*
+import kotlin.collections.ArrayList
 
 class RecyclerPrediccionTiempo constructor(val dia: Dia?): RecyclerView.Adapter<RecyclerPrediccionTiempo.Holder>() {
     lateinit var listaDias: List<Diariamente>
@@ -81,30 +85,11 @@ class RecyclerPrediccionTiempo constructor(val dia: Dia?): RecyclerView.Adapter<
 
 
     class Holder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        var urlImg = "https://openweathermap.org/img/wn/" //10d@4x.png
-
-        var dia: TextView? = null
-        var fecha: TextView? = null
-        var temp_max: TextView? = null
-        var temp_min: TextView? = null
-        var precipitacion: TextView? = null
-        var humedad: TextView? = null
-        var viento: TextView? = null
-        var hora: TextView? = null
-        var iconoTiempo: ImageView? = null
-        var ciudad: TextView? = null
+        val binding: ItemDiaBinding
 
         init {
-            dia = itemView.findViewById(R.id.txt_dia_item)
-            fecha = itemView.findViewById(R.id.txt_uv_itemHora)
-            temp_max = itemView.findViewById(R.id.txt_hora_itemhora)
-            temp_min = itemView.findViewById(R.id.txt_temp_itemHora)
-            precipitacion = itemView.findViewById(R.id.txt_precipitacion_item)
-            humedad = itemView.findViewById(R.id.txt_humity_item)
-            viento = itemView.findViewById(R.id.txt_viento_item)
-            iconoTiempo = itemView.findViewById(R.id.img_icono_tiempo_itemHora)
-            hora = itemView.findViewById(R.id.txt_hora_item)
-            ciudad = itemView.findViewById(R.id.txt_ciudad_ldt)
+            binding = ItemDiaBinding.bind(itemView)
+
         }
 
         fun asignarDatos(dia: Diariamente) {
@@ -112,29 +97,27 @@ class RecyclerPrediccionTiempo constructor(val dia: Dia?): RecyclerView.Adapter<
 
             val time: LocalDateTime = LocalDateTime.ofInstant(instant, ZoneId.systemDefault())
 
-            this.dia?.text = time.dayOfWeek.toString()
+            binding.txtDiaItem.text = time.dayOfWeek.getDisplayName(TextStyle.FULL, Locale("es")).capitalize()
 
-            val datatimeformater = DateTimeFormatter.ofPattern("dd/MM/yyyy")
-            val vfecha = time.format(datatimeformater)
-            fecha?.text = vfecha
+            binding.txtFechaItem.text = getdateformatted(time,"dd/MM/yyyy")
 
             val url = URL_ICON + dia.weather?.get(0)?.icon + "@4x.png"
             setIcon(url)
 
-            temp_max?.text = Math.round(dia.temp!!.max).toString()
+            binding.txtTempMaxItem.text =""+ Math.round(dia.temp!!.max)+" ºC"
 
-            temp_min?.text = Math.round(dia.temp.min).toString()
+            binding.txtTempMinItem.text =""+ Math.round(dia.temp.min)+" ºC"
 
-            viento?.text = Math.round(dia.wind_speed!!.toDouble()).toString() + " Km/h"
+            binding.txtVientoItem.text =""+ Math.round(dia.wind_speed!!.toDouble()) + " m/s"
 
-            humedad?.text = dia.humidity
+            binding.txtHumityItem.text = dia.humidity
 
 
-            precipitacion?.text
+
             if (dia.rain == null) {
-                precipitacion?.text = "0 mm"
+                binding.txtPrecipitacionItem.text = "0 mm"
             } else {
-                Math.round(dia.rain.toDouble()).toString() + "0 mm"
+                binding.txtPrecipitacionItem.text =""+ Math.round(dia.rain.toDouble()) + " mm"
             }
 
 
@@ -152,10 +135,21 @@ class RecyclerPrediccionTiempo constructor(val dia: Dia?): RecyclerView.Adapter<
                 }
 
                 override fun onBitmapLoaded(bitmap: Bitmap?, from: Picasso.LoadedFrom?) {
-                    iconoTiempo?.setImageBitmap(bitmap)
+                    binding.imgIconoTiempoItem.setImageBitmap(bitmap)
                 }
 
             })
+        }
+        fun getdateformatted(milliseconds: Long, pattern: String): String {
+
+            val instant = Instant.ofEpochSecond(milliseconds)
+            val date = LocalDateTime.ofInstant(instant, ZoneId.systemDefault())
+            var auxdateTimeFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern(pattern)
+            return date.format(auxdateTimeFormatter)
+        }
+        fun getdateformatted(date: LocalDateTime, pattern: String): String {
+            val dateTimeFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern(pattern)
+            return date.format(dateTimeFormatter)
         }
     }
 }

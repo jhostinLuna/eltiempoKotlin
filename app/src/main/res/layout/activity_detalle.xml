@@ -52,18 +52,18 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="#03A9F4"
-            android:backgroundTint="#8AACC6"
-            android:backgroundTintMode="multiply"
             android:orientation="horizontal"
             android:paddingTop="8dp">
 
             <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_marginRight="5dp"
                 android:layout_weight="1"
+                android:background="#03A9F4"
                 android:gravity="center_horizontal"
-                android:orientation="vertical">
+                android:orientation="vertical"
+                android:paddingTop="8dp">
 
                 <ImageView
                     android:id="@+id/img_sol_ld"
@@ -126,9 +126,12 @@
             <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_marginRight="5dp"
                 android:layout_weight="1"
+                android:background="#03A9F4"
                 android:gravity="center_horizontal"
-                android:orientation="vertical">
+                android:orientation="vertical"
+                android:paddingTop="8dp">
 
                 <ImageView
                     android:id="@+id/img_luna_ld"
@@ -192,8 +195,10 @@
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
+                android:background="#03A9F4"
                 android:gravity="center"
-                android:orientation="vertical">
+                android:orientation="vertical"
+                android:paddingTop="8dp">
 
                 <TextView
                     android:id="@+id/txt_uva_ld"

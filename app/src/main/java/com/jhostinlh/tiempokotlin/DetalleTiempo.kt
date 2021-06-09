@@ -30,6 +30,7 @@ class DetalleTiempo : AppCompatActivity() {
     lateinit var binding: ActivityDetalleTiempoBinding
     lateinit var recycler: RecyclerView
     lateinit var geo: Geocoder
+    lateinit var arrayCoord: List<String>
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityDetalleTiempoBinding.inflate(layoutInflater)
@@ -37,18 +38,21 @@ class DetalleTiempo : AppCompatActivity() {
         AndroidThreeTen.init(this)
         recycler = findViewById(R.id.recycler_tiempo)
         recycler.layoutManager = LinearLayoutManager(this,LinearLayoutManager.VERTICAL,false)
+        arrayCoord = intent.getSerializableExtra(CIUDAD).toString().split(";")
         geo = Geocoder(this)
-
+        Log.i("array",arrayCoord[0]+"--"+arrayCoord[1])
 
         getDias()
 
     }
 
     fun getDias(){
-        val geocoder = intent.getParcelableArrayListExtra<Address>(CIUDAD)
+        val geocoder: MutableList<Address> = geo.getFromLocation(arrayCoord[0].toDouble(),arrayCoord[1].toDouble(),1)
+        val latitude: String = arrayCoord[0]
+        val longitude: String = arrayCoord[1]
         val apiAdapter = MyApiAdapter.getApiService()
         val call = apiAdapter?.getPrediccionDias(
-                geocoder?.get(0)?.latitude.toString(), geocoder?.get(0)?.longitude.toString(),
+                latitude, longitude,
                 "current,minutely,alerts","metric","es", API_KEY)
 
         if (call != null) {
@@ -61,21 +65,21 @@ class DetalleTiempo : AppCompatActivity() {
                     val respuesta = response.body()
                     if (respuesta != null) {
                         Log.i("responseDia",respuesta.toString())
-                        if (geocoder != null) {
-                            binding.txtCiudadLdt.text = geocoder.get(0).locality
-                            binding.txtTemperaturaLdt.text = Math.round(respuesta.daily.get(0).temp!!.day).toString()
-                            binding.description.text = respuesta.daily.get(0).weather!!.get(0).description
-                            val recyclerTiempo = RecyclerPrediccionTiempo(respuesta)
 
-                            if (respuesta != null) {
-                                Log.i("dia", respuesta.getListHours(respuesta.daily.get(0).dt!!.toInt()).toString())
-                            }else{
-                                Log.i("dia","Dia es null")
-                            }
+                        binding.txtCiudadLdt.text = geocoder.get(0).locality
+                        binding.txtTemperaturaLdt.text =""+ Math.round(respuesta.daily.get(0).temp!!.day)
+                        binding.description.text = respuesta.daily.get(0).weather!!.get(0).description!!.capitalize()
+                        val recyclerTiempo = RecyclerPrediccionTiempo(respuesta)
 
-                            recycler.adapter = recyclerTiempo
-
+                        if (respuesta != null) {
+                            Log.i("dia", respuesta.getListHours(respuesta.daily.get(0).dt!!.toInt()).toString())
+                        }else{
+                            Log.i("dia","Dia es null")
                         }
+
+                        recycler.adapter = recyclerTiempo
+
+
                     }
                 }
 

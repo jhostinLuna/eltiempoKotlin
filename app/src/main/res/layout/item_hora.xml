@@ -26,10 +26,11 @@
             android:layout_weight="1"
             android:gravity="center"
             android:minWidth="200dp"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:paddingLeft="10dp">
 
             <TextView
-                android:id="@+id/txt_hora_itemhora"
+                android:id="@+id/txtHoraItemhora"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="#8BC34A"
@@ -39,7 +40,7 @@
                 tools:text="20º" />
 
             <TextView
-                android:id="@+id/txt_temp_itemHora"
+                android:id="@+id/txtTempItemHora"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="#4CAF50"
@@ -57,9 +58,9 @@
             android:orientation="vertical">
 
             <ImageView
-                android:id="@+id/img_icono_tiempo_itemHora"
+                android:id="@+id/imgIconoTiempoItemHora"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
+                android:layout_height="wrap_content"
                 android:layout_margin="0dp"
                 android:layout_marginStart="0dp"
                 android:layout_marginTop="0dp"
@@ -173,7 +174,7 @@
                 app:srcCompat="@drawable/proteccionuv" />
 
             <TextView
-                android:id="@+id/txt_uv_itemHora"
+                android:id="@+id/txtUvItemHora"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="2"
