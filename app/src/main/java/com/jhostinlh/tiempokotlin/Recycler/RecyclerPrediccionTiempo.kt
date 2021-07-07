@@ -26,13 +26,13 @@ import org.threeten.bp.format.DateTimeFormatter
 import org.threeten.bp.format.TextStyle
 import java.util.*
 import kotlin.collections.ArrayList
-
+import com.jhostinlh.tiempokotlin.Recycler.*
 class RecyclerPrediccionTiempo constructor(val dia: Dia?): RecyclerView.Adapter<RecyclerPrediccionTiempo.Holder>() {
     lateinit var listaDias: List<Diariamente>
 
     init {
         if (dia != null) {
-            listaDias = dia.daily
+            listaDias = dia.daily!!
         }
     }
 
@@ -65,8 +65,11 @@ class RecyclerPrediccionTiempo constructor(val dia: Dia?): RecyclerView.Adapter<
                     val intent = Intent(holder.itemView.context, Detalle::class.java)
                     //cojo los milisegundos del dia para pasarlos a LocalDateTime
                     val dt = listaDias.get(position).dt
+                    Log.i("dias",listaDias.toString())
                     val arrayHoras: ArrayList<CadaHora> = dia!!.getListHours(dt!!.toInt())
+                    Log.i("arrahoras",dia.hourly.toString())
                     val datosDia: Diariamente? = listaDias.get(position)
+                    Log.i("arraydia",datosDia.toString())
                     val arraydia = ArrayList<Diariamente>()
                     if (datosDia != null) {
                         arraydia.add(datosDia)

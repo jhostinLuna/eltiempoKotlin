@@ -32,7 +32,7 @@ data class CadaHora (
 		val weather : List<TiempoDia>,
 		val pop : Double,
 		val rain : Lluvia?
-): Serializable,Parcelable {
+): Parcelable {
 	constructor(parcel: Parcel) : this(
 			parcel.readInt(),
 			parcel.readDouble(),

@@ -1,7 +1,9 @@
 package com.jhostinlh.tiempokotlin
 
 
+import Dia
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
@@ -24,9 +26,14 @@ import com.google.android.gms.location.*
 import com.google.android.gms.tasks.OnFailureListener
 import com.google.android.gms.tasks.OnSuccessListener
 import com.google.android.gms.tasks.Task
+import com.jhostinlh.tiempokotlin.Retrofit.MyApiAdapter
 import com.jhostinlh.tiempokotlin.databinding.ActivityMainBinding
-import com.jhostinlh.tiempokotlin.location.levantarGPS.LocationUtils
+import retrofit2.Call
 import java.io.IOException
+import retrofit2.Callback
+import retrofit2.Response
+import java.util.*
+import kotlin.collections.ArrayList
 
 
 const val CIUDAD = "com.jhostinlh.tiempokotlin.CIUDAD"
@@ -34,24 +41,42 @@ class MainActivity : AppCompatActivity(), View.OnClickListener{
     lateinit var binding: ActivityMainBinding
     companion object{
         val LOCATION_REQUEST_CODE: Int = 10001
+        const val REQUEST_CODE_UBICATION = 0x600
+
     }
+    var location: Location? = null
     lateinit var miIntent: Intent
-    private lateinit var coord:String
     private lateinit var geocoder: Geocoder
     private lateinit var fusedLocationClient: FusedLocationProviderClient
+    var fineLocation: Int = 0
+    var coarseLocation: Int = 0
+    lateinit var locationManager: LocationManager
+    lateinit var taskLocationSetResp: Task<LocationSettingsResponse>
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
         geocoder = Geocoder(this@MainActivity)
-        coord = ""
         miIntent = Intent()
         miIntent = Intent(this,DetalleTiempo::class.java)
         binding.btnEnviarMa.setOnClickListener(this)
         binding.imgUbicacionMa.setOnClickListener(this)
+        binding.imgMapsMa.setOnClickListener(this)
+        fineLocation = ContextCompat.checkSelfPermission(this,Manifest.permission.ACCESS_FINE_LOCATION)
+        coarseLocation = ContextCompat.checkSelfPermission(this,Manifest.permission.ACCESS_COARSE_LOCATION)
+        locationManager = getSystemService(Context.LOCATION_SERVICE)  as LocationManager
+        val locationRequest: LocationRequest = LocationRequest.create()
 
+        // iniciando configuracion de clliente SettingClient
+        locationRequest.priority = LocationRequest.PRIORITY_HIGH_ACCURACY
+        val builder: LocationSettingsRequest.Builder = LocationSettingsRequest.Builder().addLocationRequest(locationRequest)
+        val settingsClient: SettingsClient = LocationServices.getSettingsClient(this)
+        val locationSettingsRequest: LocationSettingsRequest?
+        locationSettingsRequest = builder.build()
+        builder.setAlwaysShow(true)
 
+        taskLocationSetResp = settingsClient.checkLocationSettings(locationSettingsRequest)
     }
 
     override fun onRequestPermissionsResult(
@@ -61,21 +86,26 @@ class MainActivity : AppCompatActivity(), View.OnClickListener{
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
 
-        if (requestCode == 1 ){
-            if (grantResults[0] == PackageManager.PERMISSION_GRANTED && grantResults.size > 0){
-                // Permission Granted
-                asklocationPermission()
-            }else{
-                //Permission no Granted
-                Toast.makeText(this,"Permiso Denegado!!",Toast.LENGTH_LONG).show()
-            }
+        when(requestCode){
+            LOCATION_REQUEST_CODE ->
+                if (grantResults.size > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED ){
+                    // Permission Granted
+                    Toast.makeText(this, "¡Permiso Concedido!",Toast.LENGTH_LONG).show()
+
+                }else{
+                    //Permission no Granted
+                    Toast.makeText(this, "¡Necesitas Permisos para utilizar esta función!",Toast.LENGTH_LONG).show()
+                }
         }
+
+
     }
 
+    @SuppressLint("MissingPermission")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         Log.d("prueba", "onActivityResult() called with: requestCode = [$requestCode], resultCode = [$resultCode], data = [$data]")
-        if (requestCode == LocationUtils.PRIORITY_HIGH_ACCURACY_REQ) {
+        if (requestCode == REQUEST_CODE_UBICATION) {
             when (resultCode) {
                 Activity.RESULT_OK -> {
                     //GPS activado por el usuario
@@ -83,10 +113,11 @@ class MainActivity : AppCompatActivity(), View.OnClickListener{
                     var milListener: android.location.LocationListener = object : android.location.LocationListener {
 
 
-                        /*Se ejecuta cada vez que hay un cambio en la configuracion del gps*/
+
 
 
                         override fun onProviderEnabled(provider: String) {
+                            Toast.makeText(this@MainActivity,"Tu Ubicación esta Desactivada",Toast.LENGTH_LONG).show()
 
                         }
 
@@ -94,41 +125,20 @@ class MainActivity : AppCompatActivity(), View.OnClickListener{
                             Toast.makeText(this@MainActivity,"GPS ha sido desHabilitado",Toast.LENGTH_LONG).show()
 
                         }
-
+                        /*Se ejecuta cada vez que hay un cambio en la configuracion del gps*/
                         override fun onLocationChanged(location: Location) {
-                            miIntent.putExtra(CIUDAD,"${location.latitude};${location.longitude}")
-                            startActivity(miIntent)
+                            peticionApiService(location)
                         }
 
 
                     }
 
-                    val estado: LocationSettingsStates = LocationSettingsStates.fromIntent(data)
 
-                    estado.isGpsUsable
                     val locationManager: LocationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
-
-                    if (ContextCompat.checkSelfPermission(this,Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED){
-                        if (ActivityCompat.shouldShowRequestPermissionRationale(this,Manifest.permission.ACCESS_FINE_LOCATION)){
-                            Toast.makeText(this,"Ya tienes permisos de localizacion fineLocation",Toast.LENGTH_LONG).show()
-
-
-
-                        }else{
-                            ActivityCompat.requestPermissions(this,arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
-                                LOCATION_REQUEST_CODE)
-                            Toast.makeText(this,"se va a else",Toast.LENGTH_LONG).show()
-
-                        }
-                    }else{
+                    if (asklocationPermission()){
                         locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,600000,7000f,milListener)
 
                     }
-
-
-
-
-
 
                 }
                 Activity.RESULT_CANCELED -> {
@@ -137,70 +147,62 @@ class MainActivity : AppCompatActivity(), View.OnClickListener{
             }
         }
     }
+    @SuppressLint("MissingPermission")
+    // Si tiene permiso y esta habilitado la ubicacion llama a peticionApiService con location actual
     fun getUbicacion(){
-        habilitaUbicacion()
-        if (coord.isNotEmpty()){
-
-            startActivity(miIntent);
-        }else{
-
-            asklocationPermission()
+        //Pido permisos para acceder a la ubicación
+        if (asklocationPermission()){
+            val task = fusedLocationClient.lastLocation
+            if(!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)){
+                habilitaUbicacion()
+            }else{
+                task.addOnSuccessListener { location ->
+                    // Pido los datos a webservice y la envio a la Activity DetalleTiempo
+                    peticionApiService(location)
+                }
+            }
         }
-
     }
-    fun habilitaUbicacion(){
-        val locationRequest: LocationRequest = LocationRequest.create()
-
-        locationRequest.priority = LocationRequest.PRIORITY_HIGH_ACCURACY
-        val builder: LocationSettingsRequest.Builder = LocationSettingsRequest.Builder().addLocationRequest(locationRequest)
-
-
-
-
-        val settingsClient: SettingsClient = LocationServices.getSettingsClient(this)
-        val locationSettingsRequest: LocationSettingsRequest?
-
-
-        locationSettingsRequest = builder.build()
-        builder.setAlwaysShow(true)
-
-
-
-        settingsClient
-            .checkLocationSettings(locationSettingsRequest)
-            .addOnSuccessListener(this as Activity) {
-                // GPS enabled already
-                val locationManager: LocationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
-                val locationRequest: LocationRequest = LocationRequest()
-                locationRequest.priority = LocationRequest.PRIORITY_HIGH_ACCURACY
-                if (ActivityCompat.checkSelfPermission(
-                        this,
-                        Manifest.permission.ACCESS_FINE_LOCATION
-                    ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
-                        this,
-                        Manifest.permission.ACCESS_COARSE_LOCATION
-                    ) != PackageManager.PERMISSION_GRANTED
-                ) {
-                    Toast.makeText(this,"locationManager no funciona",Toast.LENGTH_LONG).show()
-
-                }else{
-                    val loc:Location? = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER)
-                    if (loc != null) {
-                        miIntent.putExtra(CIUDAD,"${loc.latitude};${loc.longitude}")
-
+    //recoge location y pide a la web service los datos
+    private fun peticionApiService(location: Location) {
+        val myApiService = MyApiAdapter.getApiService()
+        val call = myApiService?.getPrediccionDias(location.latitude.toString(),
+            location.longitude.toString(),"current,minutely,alerts","metric","es", API_KEY)
+        if (call != null) {
+            call.enqueue(object : Callback<Dia>{
+                override fun onResponse(call: Call<Dia>, response: Response<Dia>) {
+                    if (!response.isSuccessful){
+                        Log.i("responseretrofit","Respuesta retrofit sin exito")
+                        return
                     }
+                    val respuesta: Dia = response.body()!!
+                    Log.i("apiService",respuesta.toString())
+                    miIntent.putExtra(CIUDAD,respuesta)
+                    startActivity(miIntent)
+
 
                 }
 
+                override fun onFailure(call: Call<Dia>, t: Throwable) {
+                    Log.i("responseretrofit","Respuesta Fállida")
+                }
 
-            }
-            .addOnFailureListener(this@MainActivity) { e ->
+            })
+        }
+    }
+    //Habilita Ubicación si no lo esta sacando el dialogo para que acepte el usuario
+    @SuppressLint("MissingPermission")
+    fun habilitaUbicacion(){
+    taskLocationSetResp.addOnSuccessListener {
+        Toast.makeText(this@MainActivity,"Ubicación Habilitada!!",Toast.LENGTH_LONG).show()
+
+    }.addOnFailureListener(this@MainActivity) { e ->
                 when ((e as ApiException).statusCode) {
                     LocationSettingsStatusCodes.RESOLUTION_REQUIRED ->
                         try {
                             val rae = e as ResolvableApiException
                             rae.startResolutionForResult(this@MainActivity,
-                                LocationUtils.PRIORITY_HIGH_ACCURACY_REQ
+                                REQUEST_CODE_UBICATION
                             )
                         } catch (sie: IntentSender.SendIntentException) {
                             Log.i("prueba", "PendingIntent unable to execute request.")
@@ -210,56 +212,50 @@ class MainActivity : AppCompatActivity(), View.OnClickListener{
                     }
                 }
             }
+
     }
-    private fun asklocationPermission() {
-        if (ContextCompat.checkSelfPermission(this,Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED){
+    /*Pide permiso de ubicacion si no los tiene,
+    si los tiene ya devuelve true y si no saca el dialogo para pedirlo
+     */
+    private fun asklocationPermission(): Boolean {
+
+        var ok = false
+
+        if (fineLocation != PackageManager.PERMISSION_GRANTED && coarseLocation != PackageManager.PERMISSION_GRANTED){
+            ActivityCompat.requestPermissions(this,arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+                LOCATION_REQUEST_CODE)
+            Log.i("permission", "se va a requestPermision")
+            /*
+            // Entra en el if aunque ya haya sido denegado antes y dentro saca el dialogo del permiso
             if (ActivityCompat.shouldShowRequestPermissionRationale(this,Manifest.permission.ACCESS_FINE_LOCATION)){
-                Toast.makeText(this,"Ya tienes permisos de localizacion fineLocation",Toast.LENGTH_LONG).show()
-
-
-
-            }else{
                 ActivityCompat.requestPermissions(this,arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
                     LOCATION_REQUEST_CODE)
-                Toast.makeText(this,"se va a else",Toast.LENGTH_LONG).show()
+                Log.i("permission", "pide permisos")
+            }
+
+            else{
+
+                ActivityCompat.requestPermissions(this,arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+                    LOCATION_REQUEST_CODE)
+                Log.i("permission", "se va a requestPermision")
 
             }
+             */
         }else{
-            val locationTask : Task<Location> = fusedLocationClient.lastLocation
-
-            locationTask.addOnSuccessListener(object :OnSuccessListener<Location>{
-                override fun onSuccess(p0: Location?) {
-                    if (p0 != null) {
-                        coord = "${p0.latitude};${p0.longitude}"
-                        miIntent.putExtra(CIUDAD,coord)
-                        startActivity(miIntent)
-                    }else{
-                        Toast.makeText(this@MainActivity,"getLastLocation es null!!",Toast.LENGTH_LONG).show()
-                    }
-                }
-
-            })
-            locationTask.addOnFailureListener(object :OnFailureListener{
-                override fun onFailure(p0: Exception) {
-                    Log.i("fallo",p0.localizedMessage)
-                }
-
-            })
-
+            ok = true
         }
-
+        return ok
     }
 
 
 
 
-
-
-    fun intentToDetalle(){
-        var txtciudad: String = binding.edittxtCiudad.text.toString()
+    //carga datos de apiservice de la ciudad escrita en el Editext escrito por el usuario
+    fun inputCiudad(){
+        val txtciudad: String = binding.edittxtCiudad.text.toString()
         var city: MutableList<Address> = ArrayList<Address>()
         try{
-            city = geocoder.getFromLocationName(txtciudad, 1)
+            city = geocoder.getFromLocationName(txtciudad, 2)
 
         }catch (e: IOException){
             Log.i("geocoder","¡if the network is unavailable or any other I/O problem occurs!")
@@ -268,16 +264,12 @@ class MainActivity : AppCompatActivity(), View.OnClickListener{
             Log.i("geocoder","if locationName is null")
             return
         }
-        if (city.isNotEmpty()){
-            coord = ""+city[0].latitude+";"+city[0].longitude
-            if (txtciudad.isNotEmpty()){
+        if (city.isNotEmpty() && txtciudad.isNotEmpty() ){
+            val loc = Location(LocationManager.GPS_PROVIDER)
+            loc.latitude = city[0].latitude
+            loc.longitude = city[0].longitude
+            peticionApiService(loc)
 
-                miIntent.apply { putExtra(CIUDAD,coord) }
-                startActivity(miIntent);
-                coord=""
-            }else{
-                Toast.makeText(this, "¡Lo Has dejado en blanco!", Toast.LENGTH_SHORT).show()
-            }
         }else{
             Toast.makeText(this, "¡introduce una ciudad válida!", Toast.LENGTH_SHORT).show()
 
@@ -290,12 +282,16 @@ class MainActivity : AppCompatActivity(), View.OnClickListener{
 
     override fun onClick(v: View?) {
         if (v != null) {
-            if (v.id == R.id.btn_enviar_ma){
+            if (v.id == binding.btnEnviarMa.id){
 
-                intentToDetalle()
+                inputCiudad()
             }
-            else if (v.id == R.id.img_ubicacion_ma){
+            else if (v.id == binding.imgUbicacionMa.id){
                 getUbicacion()
+            }else if (v.id == binding.imgMapsMa.id){
+                habilitaUbicacion()
+                val intent = Intent(this,MapsActivity::class.java)
+                startActivity(intent)
             }
         }else{
             Toast.makeText(this, "¡View es null!", Toast.LENGTH_SHORT).show()
