@@ -55,10 +55,7 @@ dependencies {
 
     // ViewModel
     implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:2.3.1"
-    // LiveData
-    implementation "androidx.lifecycle:lifecycle-livedata-ktx:2.3.1"
-    //ViewModel Activity
-    implementation "androidx.activity:activity-ktx:1.2.2"
+
     //Compatibilidad con java.time en android version anterior a 26
     implementation 'com.jakewharton.threetenabp:threetenabp:1.2.1'
     //Picassso carga de imagenes
@@ -70,5 +67,11 @@ dependencies {
     implementation 'info.androidhive:fontawesome:0.0.5'
     //ubicacion
     implementation 'com.google.android.gms:play-services-location:18.0.0'
+
+    //SDK APP CENTER
+    def appCenterSdkVersion = '4.3.1'
+    implementation "com.microsoft.appcenter:appcenter-analytics:${appCenterSdkVersion}"
+    implementation "com.microsoft.appcenter:appcenter-crashes:${appCenterSdkVersion}"
+
 
 }

@@ -12,9 +12,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.jakewharton.threetenabp.AndroidThreeTen
 import com.jhostinlh.tiempokotlin.Recycler.RecyclerPrediccionTiempo
 import com.jhostinlh.tiempokotlin.databinding.ActivityDetalleTiempoBinding
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
 import java.io.IOException
 
 const val API_KEY = "4e719a84e03ef9f6ef6f38418f24e0bb"
