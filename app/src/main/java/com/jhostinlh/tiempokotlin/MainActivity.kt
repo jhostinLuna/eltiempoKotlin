@@ -40,12 +40,6 @@ import com.microsoft.appcenter.AppCenter
 import com.microsoft.appcenter.distribute.Distribute
 
 
-
-
-
-
-
-
 const val CIUDAD = "com.jhostinlh.tiempokotlin.CIUDAD"
 class MainActivity : AppCompatActivity(), View.OnClickListener{
     lateinit var binding: ActivityMainBinding
@@ -92,6 +86,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener{
             Analytics::class.java, Crashes::class.java
         )
         AppCenter.start(application, "32de52e5-b616-45f0-bde7-09fad6287c0e", Distribute::class.java)
+
     }
 
     override fun onRequestPermissionsResult(
