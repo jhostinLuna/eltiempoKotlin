@@ -9,7 +9,6 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.jhostinlh.tiempokotlin.R
 import com.jhostinlh.tiempokotlin.URL_ICON
-import com.jhostinlh.tiempokotlin.databinding.ActivityDetalleBinding
 import com.jhostinlh.tiempokotlin.databinding.ItemHoraBinding
 import com.squareup.picasso.Picasso
 import com.squareup.picasso.Target

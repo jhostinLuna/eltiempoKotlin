@@ -23,8 +23,6 @@ import androidx.core.content.ContextCompat
 import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.location.*
-import com.google.android.gms.tasks.OnFailureListener
-import com.google.android.gms.tasks.OnSuccessListener
 import com.google.android.gms.tasks.Task
 import com.jhostinlh.tiempokotlin.Retrofit.MyApiAdapter
 import com.jhostinlh.tiempokotlin.databinding.ActivityMainBinding
@@ -34,6 +32,18 @@ import retrofit2.Callback
 import retrofit2.Response
 import java.util.*
 import kotlin.collections.ArrayList
+import com.microsoft.appcenter.crashes.Crashes
+
+import com.microsoft.appcenter.analytics.Analytics
+
+import com.microsoft.appcenter.AppCenter
+import com.microsoft.appcenter.distribute.Distribute
+
+
+
+
+
+
 
 
 const val CIUDAD = "com.jhostinlh.tiempokotlin.CIUDAD"
@@ -77,6 +87,11 @@ class MainActivity : AppCompatActivity(), View.OnClickListener{
         builder.setAlwaysShow(true)
 
         taskLocationSetResp = settingsClient.checkLocationSettings(locationSettingsRequest)
+        AppCenter.start(
+            application, "32de52e5-b616-45f0-bde7-09fad6287c0e",
+            Analytics::class.java, Crashes::class.java
+        )
+        AppCenter.start(application, "32de52e5-b616-45f0-bde7-09fad6287c0e", Distribute::class.java)
     }
 
     override fun onRequestPermissionsResult(
