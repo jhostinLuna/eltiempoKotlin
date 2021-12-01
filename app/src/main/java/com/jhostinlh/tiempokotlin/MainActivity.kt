@@ -86,7 +86,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener{
             Analytics::class.java, Crashes::class.java
         )
         AppCenter.start(application, "32de52e5-b616-45f0-bde7-09fad6287c0e", Distribute::class.java)
-
+        Distribute.checkForUpdate();
     }
 
     override fun onRequestPermissionsResult(
@@ -288,6 +288,11 @@ class MainActivity : AppCompatActivity(), View.OnClickListener{
 
 
 
+    }
+
+    override fun onResume() {
+        super.onResume()
+        Toast.makeText(this,"HAS AÑADIDO DISTRIBUTION",Toast.LENGTH_LONG).show()
     }
 
     override fun onClick(v: View?) {
