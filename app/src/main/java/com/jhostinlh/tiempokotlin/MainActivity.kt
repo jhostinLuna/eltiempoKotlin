@@ -290,6 +290,11 @@ class MainActivity : AppCompatActivity(), View.OnClickListener{
 
     }
 
+    override fun onResume() {
+        super.onResume()
+        Toast.makeText(this,"HAS AÑADIDO DISTRIBUTION",Toast.LENGTH_LONG).show()
+    }
+
     override fun onClick(v: View?) {
         if (v != null) {
             if (v.id == binding.btnEnviarMa.id){
