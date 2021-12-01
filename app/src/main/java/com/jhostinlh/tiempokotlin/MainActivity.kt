@@ -293,6 +293,8 @@ class MainActivity : AppCompatActivity(), View.OnClickListener{
     override fun onResume() {
         super.onResume()
         Toast.makeText(this,"HAS AÑADIDO DISTRIBUTION",Toast.LENGTH_LONG).show()
+        Toast.makeText(this,"Ya se distribuido!!!",Toast.LENGTH_LONG).show()
+
     }
 
     override fun onClick(v: View?) {
