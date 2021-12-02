@@ -26,18 +26,26 @@ class MyDistributeListener : DistributeListener {
 
         // Mimic default SDK buttons
         dialogBuilder.setPositiveButton(
-            com.microsoft.appcenter.distribute.R.string.appcenter_distribute_update_dialog_download
-        ) { dialog, which -> // This method is used to tell the SDK what button was clicked
-            Distribute.notifyUpdateAction(UpdateAction.UPDATE)
-        }
+            com.microsoft.appcenter.distribute.R.string.appcenter_distribute_update_dialog_download,
+            object :DialogInterface.OnClickListener{
+                override fun onClick(p0: DialogInterface?, p1: Int) {
+                    Distribute.notifyUpdateAction(UpdateAction.UPDATE)
+                }
+
+            }
+            )
 
         // We can postpone the release only if the update isn't mandatory
         if (!releaseDetails.isMandatoryUpdate) {
             dialogBuilder.setNegativeButton(
-                com.microsoft.appcenter.distribute.R.string.appcenter_distribute_update_dialog_postpone
-            ) { dialog, which -> // This method is used to tell the SDK what button was clicked
-                Distribute.notifyUpdateAction(UpdateAction.POSTPONE)
-            }
+                com.microsoft.appcenter.distribute.R.string.appcenter_distribute_update_dialog_postpone,
+                object :DialogInterface.OnClickListener{
+                    override fun onClick(p0: DialogInterface?, p1: Int) {
+                        Distribute.notifyUpdateAction(UpdateAction.POSTPONE)
+                    }
+
+                }
+            )
         }
         dialogBuilder.setCancelable(false) // if it's cancelable you should map cancel to postpone, but only for optional updates
         dialogBuilder.create().show()
