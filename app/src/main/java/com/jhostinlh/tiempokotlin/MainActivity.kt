@@ -79,7 +79,8 @@ class MainActivity : AppCompatActivity(), View.OnClickListener{
         val locationSettingsRequest: LocationSettingsRequest?
         locationSettingsRequest = builder.build()
         builder.setAlwaysShow(true)
-
+        Distribute.setEnabledForDebuggableBuild(true)
+        Distribute.setEnabled(true);
         taskLocationSetResp = settingsClient.checkLocationSettings(locationSettingsRequest)
 
         Distribute.setListener(MyDistributeListener())
@@ -87,6 +88,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener{
             application, "32de52e5-b616-45f0-bde7-09fad6287c0e",
             Analytics::class.java, Crashes::class.java, Distribute::class.java
         )
+
 
     }
 
