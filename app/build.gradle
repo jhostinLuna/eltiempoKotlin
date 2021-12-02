@@ -35,6 +35,17 @@ android {
     kotlinOptions {
         jvmTarget = '1.8'
     }
+
+    flavorDimensions "distribute"
+    productFlavors {
+        appCenter {
+            dimension "distribute"
+        }
+        googlePlay {
+            dimension "distribute"
+        }
+    }
+
 }
 
 dependencies {
@@ -73,4 +84,8 @@ dependencies {
     implementation "com.microsoft.appcenter:appcenter-analytics:${appCenterSdkVersion}"
     implementation "com.microsoft.appcenter:appcenter-crashes:${appCenterSdkVersion}"
     implementation "com.microsoft.appcenter:appcenter-distribute:${appCenterSdkVersion}"
+
+
+    appCenterImplementation "com.microsoft.appcenter:appcenter-distribute:${appCenterSdkVersion}"
+    googlePlayImplementation "com.microsoft.appcenter:appcenter-distribute-play:${appCenterSdkVersion}"
 }

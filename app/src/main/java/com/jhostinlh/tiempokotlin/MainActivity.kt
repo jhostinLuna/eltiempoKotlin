@@ -81,12 +81,13 @@ class MainActivity : AppCompatActivity(), View.OnClickListener{
         builder.setAlwaysShow(true)
 
         taskLocationSetResp = settingsClient.checkLocationSettings(locationSettingsRequest)
+        Distribute.setEnabled(true)
         AppCenter.start(
             application, "32de52e5-b616-45f0-bde7-09fad6287c0e",
-            Analytics::class.java, Crashes::class.java
+            Analytics::class.java, Crashes::class.java,Distribute::class.java
         )
-        AppCenter.start(application, "32de52e5-b616-45f0-bde7-09fad6287c0e", Distribute::class.java)
-        Distribute.checkForUpdate();
+
+        Distribute.checkForUpdate()
     }
 
     override fun onRequestPermissionsResult(
