@@ -81,7 +81,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener{
         builder.setAlwaysShow(true)
 
         taskLocationSetResp = settingsClient.checkLocationSettings(locationSettingsRequest)
-
+        Distribute.setEnabled(true)
         Distribute.setListener(MyDistributeListener())
         AppCenter.start(
             application, "32de52e5-b616-45f0-bde7-09fad6287c0e",
