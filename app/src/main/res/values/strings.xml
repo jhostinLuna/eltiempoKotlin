@@ -6,4 +6,5 @@
     <string name="content_desc_icono_tiempo">icono del tiempo actual</string>
     <string name="aleatorio">Aleatorio</string>
     <string name="title_activity_maps">Map</string>
+    <string name="no_updates_available">actualizacion no disponible</string>
 </resources>

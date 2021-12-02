@@ -17,7 +17,6 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.Toast
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -39,9 +38,6 @@ import com.microsoft.appcenter.analytics.Analytics
 
 import com.microsoft.appcenter.AppCenter
 import com.microsoft.appcenter.distribute.Distribute
-import com.microsoft.appcenter.distribute.DistributeListener
-import com.microsoft.appcenter.distribute.ReleaseDetails
-import com.microsoft.appcenter.distribute.UpdateAction
 
 
 const val CIUDAD = "com.jhostinlh.tiempokotlin.CIUDAD"
@@ -85,14 +81,14 @@ class MainActivity : AppCompatActivity(), View.OnClickListener{
         builder.setAlwaysShow(true)
 
         taskLocationSetResp = settingsClient.checkLocationSettings(locationSettingsRequest)
-        Distribute.setListener(AppCenterUpdateListener())
-        Distribute.setEnabled(true)
+
+        Distribute.setListener(MyDistributeListener())
         AppCenter.start(
             application, "32de52e5-b616-45f0-bde7-09fad6287c0e",
-            Analytics::class.java, Crashes::class.java,Distribute::class.java
+            Analytics::class.java, Crashes::class.java
         )
+        AppCenter.start(application, "32de52e5-b616-45f0-bde7-09fad6287c0e", Distribute::class.java)
 
-        //Distribute.checkForUpdate()
     }
 
     override fun onRequestPermissionsResult(
@@ -298,6 +294,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener{
 
     override fun onResume() {
         super.onResume()
+        Toast.makeText(this,"HAS AÑADIDO DISTRIBUTION",Toast.LENGTH_LONG).show()
         Toast.makeText(this,"Ya se distribuido!!!",Toast.LENGTH_LONG).show()
 
     }
@@ -321,40 +318,4 @@ class MainActivity : AppCompatActivity(), View.OnClickListener{
         }
     }
 
-}
-class AppCenterUpdateListener : DistributeListener {
-
-    override fun onReleaseAvailable(activity: Activity, releaseDetails: ReleaseDetails): Boolean {
-        // Look at releaseDetails public methods to get version information, release notes text or release notes URL
-        val versionName = releaseDetails.shortVersion
-        val versionCode = releaseDetails.version
-        val releaseNotes = releaseDetails.releaseNotes
-        val releaseNotesUrl = releaseDetails.releaseNotesUrl
-
-        // Build our own dialog title and message
-        val dialogBuilder = AlertDialog.Builder(activity)
-        dialogBuilder.setTitle("Version $versionName available!")
-        dialogBuilder.setMessage(releaseNotes)
-
-        // Mimic default SDK buttons
-        dialogBuilder.setPositiveButton(com.microsoft.appcenter.distribute.R.string.appcenter_distribute_update_dialog_download) { _, _ ->
-            Distribute.notifyUpdateAction(UpdateAction.UPDATE)
-        }
-
-        // We can postpone the release only if the update is not mandatory
-        if (!releaseDetails.isMandatoryUpdate) {
-            dialogBuilder.setNegativeButton(com.microsoft.appcenter.distribute.R.string.appcenter_distribute_update_dialog_postpone) { _, _ ->
-                Distribute.notifyUpdateAction(UpdateAction.POSTPONE)
-            }
-        }
-        dialogBuilder.setCancelable(false)
-        dialogBuilder.create().show()
-
-        // Return true if you are using your own dialog, false otherwise
-        return true
-    }
-
-    override fun onNoReleaseAvailable(activity: Activity?) {
-        TODO("Not yet implemented")
-    }
 }
