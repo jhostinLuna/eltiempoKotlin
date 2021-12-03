@@ -57,6 +57,11 @@ class MainActivity : AppCompatActivity(), View.OnClickListener{
     lateinit var locationManager: LocationManager
     lateinit var taskLocationSetResp: Task<LocationSettingsResponse>
     override fun onCreate(savedInstanceState: Bundle?) {
+        Distribute.setListener(MyDistributeListener())
+        AppCenter.start(
+            application, "32de52e5-b616-45f0-bde7-09fad6287c0e",
+            Distribute::class.java
+        )
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -79,15 +84,9 @@ class MainActivity : AppCompatActivity(), View.OnClickListener{
         val locationSettingsRequest: LocationSettingsRequest?
         locationSettingsRequest = builder.build()
         builder.setAlwaysShow(true)
-        Distribute.setEnabledForDebuggableBuild(true)
-        Distribute.setEnabled(true);
         taskLocationSetResp = settingsClient.checkLocationSettings(locationSettingsRequest)
 
-        Distribute.setListener(MyDistributeListener())
-        AppCenter.start(
-            application, "32de52e5-b616-45f0-bde7-09fad6287c0e",
-            Analytics::class.java, Crashes::class.java, Distribute::class.java
-        )
+
 
 
     }

@@ -23,7 +23,7 @@ class MyDistributeListener : DistributeListener {
         val dialogBuilder = AlertDialog.Builder(activity)
         dialogBuilder.setTitle("Version $versionName available!") // you should use a string resource instead, this is just a simple example
         dialogBuilder.setMessage(releaseNotes)
-
+        Toast.makeText(activity,"entra en onReleaseAvailable",Toast.LENGTH_LONG).show()
         // Mimic default SDK buttons
         dialogBuilder.setPositiveButton(
             com.microsoft.appcenter.distribute.R.string.appcenter_distribute_update_dialog_download,
